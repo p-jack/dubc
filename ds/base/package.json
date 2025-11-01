@@ -1,0 +1,37 @@
+{
+  "name": "dubc-ds-base",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Base class for observable data structures.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "README.md",
+    "dist/index.js",
+    "dist/index.d.ts"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepare": "tsc",
+    "test": "vitest --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/p-jack/dubc.git"
+  },
+  "author": "Paul Jack",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/p-jack/dubc/issues"
+  },
+  "homepage": "https://github.com/p-jack/dubc#readme",
+  "dependencies": {
+    "weakness": "^1.0.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4",
+    "@vitest/coverage-v8": "^3.2.4",
+    "jsdom": "^27.0.1"
+  }
+}

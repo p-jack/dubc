@@ -29,8 +29,11 @@ export abstract class Base<T> implements Iterable<T> {
   protected fire(evt:DSEvent<T>) {
     for (const f of this.ears) f(evt)
   }
+
+  abstract toEmpty():ThisType<T>
+
+  toJSON() {
+    return [...this]
+  }
+
 }
-
-
-
-

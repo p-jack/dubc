@@ -19,6 +19,10 @@ class C extends Base<number> {
     this.fire({added:{items:[v*10], at:v}})
   }
 
+  toEmpty() {
+    return new C(0)
+  }
+
 }
 
 const K = {}
@@ -30,7 +34,7 @@ test("Base", () => {
   let c = new C(0)
   expect([...c]).toStrictEqual([])
   let captured:DSEvent<number>|undefined = undefined
-  c.hear(globalThis, evt => {
+  c.hear(K, evt => {
     captured = evt
   })
   expect(captured).toStrictEqual({cleared:0})
@@ -48,18 +52,26 @@ test("Base", () => {
     a.push(r.value)
   }
   expect([...a]).toStrictEqual([0, 10])
+  expect(JSON.stringify(c)).toStrictEqual("[0,10]")
 })
 
 test("non-empty initial fire", () => {
   let c = new C(3)
   expect([...c]).toStrictEqual([0, 10, 20])
   let captured:DSEvent<number> = {}
-  c.hear(globalThis, evt => {
+  c.hear(K, evt => {
     captured = evt
   })
   expect(captured.added).not.toBeUndefined()
   expect([...captured.added?.items ?? []]).toStrictEqual([0, 10, 20])
-  expect(captured.added?.at).toBe(0)
+  expect(captured.added?.at).toStrictEqual(0)
   expect(captured.cleared).toBeUndefined()
   expect(captured.deleted).toBeUndefined()
+})
+
+test("toEmpty", () => {
+  const empty = new C(1000).toEmpty()
+  expect(empty).toBeInstanceOf(C)
+  expect(empty.size).toStrictEqual(0)
+  expect([...empty]).toStrictEqual([])
 })

@@ -21,9 +21,14 @@ export abstract class Base<T> implements Iterable<T> {
   abstract [Symbol.iterator]():Iterator<T>
 
   hear(keeper:object, ear:(evt:DSEvent<T>)=>void) {
-    this.ears.add(keeper, ear)
+    const r = this.ears.add(keeper, ear)
     if (this.size === 0) ear({cleared:0})
     else ear({added:{items:this, at:0}})
+    return r
+  }
+
+  unhear(n:number) {
+    this.ears.delete(n)
   }
 
   protected fire(evt:DSEvent<T>) {

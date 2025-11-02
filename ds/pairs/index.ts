@@ -1,6 +1,6 @@
 export interface Pair<K extends {},V> {
-  key: K
-  value: V
+  readonly key: K
+  readonly value: V
 }
 
 export type Object<K extends {},V> = K extends string ? Record<string,V> : never

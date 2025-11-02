@@ -1,7 +1,7 @@
 {
   "name": "dubc-ds-pairs",
   "type": "module",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Utilities for key/value pairs.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

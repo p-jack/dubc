@@ -13,7 +13,7 @@ export const EX_EX = { start:false, end:false }
 
 type N<K extends {},V> = Node<K,V>|undefined
 
-class Node<K extends {},V> {
+class Node<K extends {},V> implements Pair<K,V> {
 
   weight = 1
   parent:N<K,V>
@@ -125,13 +125,7 @@ export class TMap<K extends {},V> extends Base<Pair<K,V>> {
   }
 
   toEmpty() {
-    const conf2:Conf<K,V> = {
-      unique:this.conf.unique,
-      valueEq:this.conf.valueEq,
-      compare:this._compare,
-    }
-    const r = new TMap(this, conf2)
-    return r
+    return new TMap([], this.conf)
   }
 
   get size() { return this.root?.weight ?? 0 }
@@ -155,14 +149,17 @@ export class TMap<K extends {},V> extends Base<Pair<K,V>> {
   drop(f:(pair:Pair<K,V>)=>boolean) {
     let n:N<K,V> = this.first as Node<K,V>
     let at = 0
+    let c = 0
     while (n !== undefined) {
       const x = n
       n = n.next()
       if (f(x)) {
-        this.remove(x)
+        this.rawDelete(x)
         this.fire({deleted:{items:[x], at:at}})
+        c++
       } else at++
     }
+    return c
   }
 
   get compare() { return this._compare }
@@ -178,13 +175,10 @@ export class TMap<K extends {},V> extends Base<Pair<K,V>> {
     this.fire({cleared:this.size, added:{items:this, at:0}})
   }
 
-  get keyEq() { return (a:K,b:K) => this._compare(a,b) === 0 }
-  get unique() { return this.conf.unique }
-
   at(i:number):Pair<K,V> {
     let node = this.root
 		let weight = this.size
-    // if (i < 0) i += weight // TODO
+    if (!Number.isSafeInteger(i)) throw new TypeError("index must be an integer")
     if (i < 0 || i >= weight) throw new TypeError("bounds")
     while (true) {
       const left = node?.left
@@ -224,7 +218,7 @@ export class TMap<K extends {},V> extends Base<Pair<K,V>> {
     return previous
   }
 
-  *[Symbol.iterator]() {
+  *[Symbol.iterator]():Generator<Pair<K,V>> {
     let n = this.first as N<K,V>
     while (n) {
       yield n
@@ -232,20 +226,12 @@ export class TMap<K extends {},V> extends Base<Pair<K,V>> {
     }
   }
 
-  private *keys2() {
+  *keys() {
     for (const x of this) yield x.key
   }
 
-  get keys():Iterable<K> {
-    return this.keys2()
-  }
-
-  private *values2() {
+  *values() {
     for (const x of this) yield x.value
-  }
-
-  get values():Iterable<V> {
-    return this.values2()
   }
 
   *reversed() {
@@ -269,7 +255,7 @@ export class TMap<K extends {},V> extends Base<Pair<K,V>> {
   private find(key:K, op:Op = EQ) {
     let node = this.root
     let ret:N<K,V>
-    const unique = this.unique
+    const unique = this.conf.unique
     const cmp = this.compare
     while (node) {
       const c = cmp(node.key, key)
@@ -298,13 +284,18 @@ export class TMap<K extends {},V> extends Base<Pair<K,V>> {
   after(key:K):Pair<K,V>|undefined { return this.find(key, GT) }
   before(key:K):Pair<K,V>|undefined { return this.find(key, LT) }
 
+  hasAll(keys:Iterable<K>) {
+    for (const x of keys) if (!this.has(x)) return false
+    return true
+  }
+
   rank(key:K) {
     return this.find(key, EQ)?.index()
   }
 
   protected rawPut(key:K, value:V):{node:Node<K,V>,old?:V} {
     let previous:N<K,V> = undefined, node = this.root
-    let unique = this.unique ? 0 : undefined
+    let unique = this.conf.unique ? 0 : undefined
     let c = 0, cmp = this.compare
     while (node) {
       c = cmp(node.key, key)
@@ -359,13 +350,29 @@ export class TMap<K extends {},V> extends Base<Pair<K,V>> {
   delete(key:K) {
     const node = this.find(key)
     if (node === undefined) return undefined
+    return this.delete2(node)
+  }
+
+  private delete2(node:Node<K,V>) {
     const at = node.index()
-    this.remove(node)
+    this.rawDelete(node)
     this.fire({deleted:{items:[node as Pair<K,V>], at}})
     return node.value
   }
 
-  private remove(node:Node<K,V>) {
+  deleteAll(i:Iterable<K>) {
+    let c = 0
+    for (const x of i) {
+      const node = this.find(x)
+      if (node !== undefined) {
+        c++
+        this.delete2(node)
+      }
+    }
+    return c
+  }
+
+  private rawDelete(node:Node<K,V>) {
     const p = node.parent
     let left = node.left, right = node.right
     let bal:N<K,V>

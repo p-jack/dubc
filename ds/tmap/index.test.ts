@@ -74,7 +74,7 @@ let empty = tree
 let c = capture(K, tree)
 beforeEach(() => {
   tree = new TMap<number,string>([], { compare, valueEq:Object.is, unique:true })
-  tree.hear(globalThis, () => { check(root(tree)) })
+  tree.hear(K, () => { check(root(tree)) })
   c = capture(K, tree)
   empty = tree.toEmpty()
 })
@@ -95,7 +95,7 @@ const cases:TestCase[] = [
 
 describe("TMap", () => { for (const tc of cases) {
   test(tc.name + " init", () => {
-    expect(tree.size).toBe(0)
+    expect(tree.size).toStrictEqual(0)
     expect(tree.first).toBeUndefined()
     expect(tree.last).toBeUndefined()
     expect([...tree]).toStrictEqual([])
@@ -107,29 +107,30 @@ describe("TMap", () => { for (const tc of cases) {
       c.clear()
     })
     test("after", () => {
-      for (let k = 0; k <= 14; k++) expect(tree.after(k)?.key).toBe(k + 1)
+      for (let k = 0; k <= 14; k++) expect(tree.after(k)?.key).toStrictEqual(k + 1)
       expect(tree.after(15)).toBeUndefined()
       expect(empty.after(1)).toBeUndefined()
     })
     test("at", () => {
       for (let k = 1; k <= 15; k++) {
         const entry = tree.at(k - 1)
-        expect(entry?.key).toBe(k)
-        expect(entry?.value).toBe(String(k))
+        expect(entry.key).toStrictEqual(k)
+        expect(entry.value).toStrictEqual(String(k))
       }
       expect(() => tree.at(-1)).toThrowError()
+      expect(() => tree.at(0.5)).toThrowError()
       expect(() => tree.at(15)).toThrowError()
       expect(() => tree.at(100)).toThrowError()
       expect(() => empty.at(0)).toThrowError()
     })
     test("before", () => {
-      for (let k = 2; k <= 16; k++) expect(tree.before(k)?.key).toBe(k - 1)
+      for (let k = 2; k <= 16; k++) expect(tree.before(k)?.key).toStrictEqual(k - 1)
       expect(tree.before(1)).toBeUndefined()
       expect(empty.before(1)).toBeUndefined()
     })
     test("compare", () => {
       tree.compare = (a:number,b:number) => b - a
-      expect([...tree.keys]).toStrictEqual([15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1])
+      expect([...tree.keys()]).toStrictEqual([15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1])
       expect(sane(c.only())).toStrictEqual({
         cleared: 15,
         added: { at:0, items:[
@@ -155,74 +156,72 @@ describe("TMap", () => { for (const tc of cases) {
       tree.compare = compare
       expect(c.all()).toStrictEqual([])
     })
-    test("drop", () => {
-      empty.drop(pair => pair.key === 0)
+    test("delete", () => {
+      expect(tree.delete(17)).toBeUndefined()
       expect(c.all()).toStrictEqual([])
-      tree.drop(pair => pair.key === 3)
+      expect(tree.size).toStrictEqual(15)
+      let size = tree.size
+      for (const k of tc.input) {
+        const r = tree.rank(k)
+        expect(tree.delete(k)).toStrictEqual(String(k))
+        expect(sane(c.only())).toStrictEqual({
+          deleted: { items:[{key:k, value:String(k)}], at:r},
+        })
+        size--
+        expect(tree.size).toStrictEqual(size)
+      }
+      expect(tree.size).toStrictEqual(0)
+    })
+    test("deleteAll", () => {
+      expect(tree.deleteAll([10, 2, 13, 4, 1000])).toStrictEqual(4)
+      const all = c.all().map(x => sane(x))
+      expect(all).toStrictEqual([
+        {deleted:{items:[{key:10, value:"10"}], at:9}},
+        {deleted:{items:[{key:2, value:"2"}], at:1}},
+        {deleted:{items:[{key:13, value:"13"}], at:10}},
+        {deleted:{items:[{key:4, value:"4"}], at:2}},
+      ])
+    })
+    test("drop", () => {
+      expect(empty.drop(pair => pair.key === 0)).toStrictEqual(0)
+      expect(c.all()).toStrictEqual([])
+      expect(tree.drop(pair => pair.key === 3)).toStrictEqual(1)
       expect(sane(c.only())).toStrictEqual({deleted:{items:[{key:3, value:"3"}], at:2}})
     })
     test("first", () => {
-      expect(tree.first?.key).toBe(1)
-      expect(tree.first?.value).toBe("1")
+      expect(tree.first?.key).toStrictEqual(1)
+      expect(tree.first?.value).toStrictEqual("1")
     })
     test("from", () => {
-      for (let k = 1; k <= 15; k++) expect(tree.from(k)?.key).toBe(k)
-      expect(tree.from(0)?.key).toBe(1)
+      for (let k = 1; k <= 15; k++) expect(tree.from(k)?.key).toStrictEqual(k)
+      expect(tree.from(0)?.key).toStrictEqual(1)
       expect(tree.from(16)).toBeUndefined()
       expect(empty.from(1)).toBeUndefined()  
     })
     test("get", () => {
       for (let i = 1; i <= 15; i++) {
-        expect(tree.get(i)).toBe(String(i))
+        expect(tree.get(i)).toStrictEqual(String(i))
       }
+      expect(tree.get(100)).toBeUndefined()
     })
     test("has", () => {
-      expect(tree.has(10)).toBe(true)
-      expect(tree.has(10000)).toBe(false)
+      expect(tree.has(10)).toStrictEqual(true)
+      expect(tree.has(10000)).toStrictEqual(false)
     })
-    test("keyEq", () => {
-      expect(tree.keyEq(1, 1)).toBe(true)
-      expect(tree.keyEq(1, 2)).toBe(false)
+    test("hasAll", () => {
+      expect(tree.hasAll([1, 5, 10, 15])).toStrictEqual(true)
+      expect(tree.hasAll([1, 5, 10, 1000])).toStrictEqual(false)
+    })
+    test("keys", () => {
+      expect([...tree.keys()]).toStrictEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
+      expect([...empty.keys()]).toStrictEqual([])
     })
     test("last", () => {
-      expect(tree.last?.key).toBe(15)
-      expect(tree.last?.value).toBe("15")
+      expect(tree.last?.key).toStrictEqual(15)
+      expect(tree.last?.value).toStrictEqual("15")
     })
     test("only", () => {
       expect(() => { tree.only }).toThrowError()
-    })
-    test("put", () => {
-      const r = tree.set(5, "FIVE")
-      expect(r).toBe("5")
-      expect(sane(c.only())).toStrictEqual({
-        deleted: { items:[{key:5, value:"5"}], at:4},
-        added: { items:[{key:5, value:"FIVE"}], at:4},
-      })
-      expect(tree.set(5, "FIVE")).toBe("FIVE")
-      expect(c.all()).toStrictEqual([])
-      expect(tree.get(5)).toBe("FIVE")
-      expect(tree.size).toBe(15)
-      expect(tree.set(5, "5")).toBe("FIVE")
-      expect(sane(c.only())).toStrictEqual({
-        deleted: { items:[{key:5, value:"FIVE"}], at:4},
-        added: { items:[{key:5, value:"5"}], at:4},
-      })
-    })
-    test("putAll", () => {
-      expect(tree.setAll([[13.5,"13.5"]])).toBe(1)
-      expect(sane(c.only())).toStrictEqual({
-        added:{items:[{key:13.5,value:"13.5"}], at:13}
-      })
-      expect(tree.setAll([])).toBe(0)
-      expect(c.all()).toStrictEqual([])
-      tree.clear()
-      expect(sane(c.only())).toStrictEqual({cleared:16})
-      expect(tree.setAll([])).toBe(0)
-      expect(c.all()).toStrictEqual([])
-      expect(tree.setAll([[1,"1"],[2,"2"]])).toBe(2)
-      expect(sane(c.only())).toStrictEqual({
-        added:{items:[{key:1,value:"1"},{key:2,value:"2"}], at:0}
-      })
     })
     describe("range", () => {
       test("IN_IN", () => {
@@ -251,24 +250,8 @@ describe("TMap", () => { for (const tc of cases) {
       })
     })
     test("rank", () => {
-      for (let k = 1; k <= 15; k++) expect(tree.rank(k)).toBe(k - 1)
+      for (let k = 1; k <= 15; k++) expect(tree.rank(k)).toStrictEqual(k - 1)
       expect(tree.rank(16)).toBeUndefined()
-    })
-    test("removeKey", () => {
-      expect(tree.delete(17)).toBeUndefined()
-      expect(c.all()).toStrictEqual([])
-      expect(tree.size).toBe(15)
-      let size = tree.size
-      for (const k of tc.input) {
-        const r = tree.rank(k)
-        expect(tree.delete(k)).toBe(String(k))
-        expect(sane(c.only())).toStrictEqual({
-          deleted: { items:[{key:k, value:String(k)}], at:r},
-        })
-        size--
-        expect(tree.size).toBe(size)
-      }
-      expect(tree.size).toBe(0)
     })
     test("replace", () => {
       tree.replace([[0, "0"], [10, "10"]])
@@ -292,17 +275,50 @@ describe("TMap", () => { for (const tc of cases) {
       expect(keys).toStrictEqual([15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1])
       expect(values).toStrictEqual(["15", "14", "13", "12", "11", "10", "9", "8", "7", "6", "5", "4", "3", "2", "1"])
     })
+    test("set", () => {
+      const r = tree.set(5, "FIVE")
+      expect(r).toStrictEqual("5")
+      expect(sane(c.only())).toStrictEqual({
+        deleted: { items:[{key:5, value:"5"}], at:4},
+        added: { items:[{key:5, value:"FIVE"}], at:4},
+      })
+      expect(tree.set(5, "FIVE")).toStrictEqual("FIVE")
+      expect(c.all()).toStrictEqual([])
+      expect(tree.get(5)).toStrictEqual("FIVE")
+      expect(tree.size).toStrictEqual(15)
+      expect(tree.set(5, "5")).toStrictEqual("FIVE")
+      expect(sane(c.only())).toStrictEqual({
+        deleted: { items:[{key:5, value:"FIVE"}], at:4},
+        added: { items:[{key:5, value:"5"}], at:4},
+      })
+    })
+    test("setAll", () => {
+      expect(tree.setAll([[13.5,"13.5"]])).toStrictEqual(1)
+      expect(sane(c.only())).toStrictEqual({
+        added:{items:[{key:13.5,value:"13.5"}], at:13}
+      })
+      expect(tree.setAll([])).toStrictEqual(0)
+      expect(c.all()).toStrictEqual([])
+      tree.clear()
+      expect(sane(c.only())).toStrictEqual({cleared:16})
+      expect(tree.setAll([])).toStrictEqual(0)
+      expect(c.all()).toStrictEqual([])
+      expect(tree.setAll([[1,"1"],[2,"2"]])).toStrictEqual(2)
+      expect(sane(c.only())).toStrictEqual({
+        added:{items:[{key:1,value:"1"},{key:2,value:"2"}], at:0}
+      })
+    })
     test("size", () => {
-      expect(tree.size).toBe(15)
+      expect(tree.size).toStrictEqual(15)
     })
     test("to", () => {
-      for (let k = 1; k <= 15; k++) expect(tree.to(k)?.key).toBe(k)
-      expect(tree.to(16)?.key).toBe(15)
+      for (let k = 1; k <= 15; k++) expect(tree.to(k)?.key).toStrictEqual(k)
+      expect(tree.to(16)?.key).toStrictEqual(15)
       expect(tree.to(0)).toBeUndefined()
       expect(empty.to(1)).toBeUndefined()  
     })
     test("values", () => {
-      expect([...tree.values]).toStrictEqual(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"])
+      expect([...tree.values()]).toStrictEqual(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"])
     })
   })
 }})
@@ -318,8 +334,8 @@ test("clear", () => {
 test("only", () => {
   expect(() => { tree.only }).toThrowError()
   tree.set(1, "1")
-  expect(tree.only.key).toBe(1)
-  expect(tree.only.value).toBe("1")
+  expect(tree.only.key).toStrictEqual(1)
+  expect(tree.only.value).toStrictEqual("1")
   tree.set(2, "2")
   expect(() => { tree.only }).toThrowError()
 })
@@ -328,6 +344,11 @@ test("non-unique", () => {
   const tree = new TMap<number,string>([], {compare, valueEq:Object.is, unique:false})
   tree.set(1, "1")
   tree.set(1, "1")
-  expect([...tree.keys]).toStrictEqual([1, 1])
-  expect(tree.has(1)).toBe(true)
+  expect([...tree.keys()]).toStrictEqual([1, 1])
+  expect(tree.has(1)).toStrictEqual(true)
+})
+
+test("toEmpty", () => {
+  tree.compare = (a,b) => b - a
+  expect(tree.toEmpty().compare).toBe(compare)
 })

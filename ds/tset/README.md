@@ -1,4 +1,4 @@
-# dubc-ds-tindex
+# dubc-ds-tset
 
 A set of values sorted using a weighted binary search tree.
 
@@ -8,7 +8,7 @@ A set of values sorted using a weighted binary search tree.
 constructor(conf:Conf<T>, values:Iterable<T>)
 ```
 
-To construct a `TIndex`, you need a configuration object that supplies
+To construct a `TSet`, you need a configuration object that supplies
 a compare function.
 
 You also can supply an iterable of initial values to populate the set.
@@ -22,7 +22,7 @@ const conf:Conf<string> = {
   compare: (k1,k2) => k1.localeCompare(k2),
 }
 
-const set = new TIndex(conf, ["1", "2", "3"])
+const set = new TSet(conf, ["1", "2", "3"])
 ```
 
 ## Properties
@@ -164,7 +164,7 @@ Removes the listener registered with the specified number.
 
 ### Iterators
 
-* `TIndex` itself is an iterable, so you can use it directly in `for...of`
+* `TSet` itself is an iterable, so you can use it directly in `for...of`
 * `i` to get an iterator 
 * `range(start,end,include)` for partial iteration
 * `reversed()` to iterate backwards

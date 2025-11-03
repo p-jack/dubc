@@ -1,5 +1,5 @@
 {
-  "name": "dubc-ds-set",
+  "name": "dubc-ds-tset",
   "type": "module",
   "version": "1.0.0",
   "description": "Observable set based on a weighted binary search tree.",

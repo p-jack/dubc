@@ -197,6 +197,11 @@ The provided pairs can be in one of the three forms accepted by
 `TMap`'s constructor (objects with key and value fields, tuples of
 keys and values, or, for string keys, a JavaScript object.)
 
+### `.to(k:K)` O(log n)
+
+Returns the key/value pair whose key is less than or equal to the provided
+key, or `undefined` if no such pair exists in the map.
+
 ### `.unhear(n:number)` O(1)
 
 Removes the listener registered with the specified number.

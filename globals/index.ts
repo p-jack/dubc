@@ -16,3 +16,11 @@ export function setProviders(win:()=>Window, doc:()=>Document) {
   providers.win = win
   providers.doc = doc
 }
+
+export function win() {
+  return providers.win()
+}
+
+export function doc() {
+  return providers.doc()
+}

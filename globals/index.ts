@@ -3,7 +3,11 @@ interface Provider {
   doc():Document
 }
 
-export const styleSheet = new CSSStyleSheet()
+const styleSheet = new CSSStyleSheet()
+
+export function getGlobalStyleSheet() {
+  return styleSheet
+}
 
 let hydration:object[] = []
 

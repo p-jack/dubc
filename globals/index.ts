@@ -5,7 +5,15 @@ interface Provider {
 
 export const styleSheet = new CSSStyleSheet()
 
-export const state:object[] = []
+let hydration:object[] = []
+
+export function getHydration() {
+  return hydration
+}
+
+export function setHydration(a:object[]) {
+  hydration = a
+}
 
 const providers:Provider = {
   win:()=>window,

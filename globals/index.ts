@@ -5,7 +5,7 @@ interface Provider {
 
 export const styleSheet = new CSSStyleSheet()
 
-export const state = new Map<string,object>()
+export const state:object[] = []
 
 const providers:Provider = {
   win:()=>window,

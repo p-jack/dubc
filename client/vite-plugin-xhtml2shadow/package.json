@@ -1,0 +1,41 @@
+{
+  "name": "vite-plugin-xhtml2shadow",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "Converts .xhtml files into JavaScript code that produces a shadow root with that HTML.",
+  "keywords": ["vite-plugin"],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "README.md",
+    "dist/index.js",
+    "dist/index.d.ts"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepare": "tsc",
+    "test": "vitest --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/p-jack/dubc.git"
+  },
+  "author": "Paul Jack",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/p-jack/dubc/issues"
+  },
+  "homepage": "https://github.com/p-jack/dubc#readme",
+  "devDependencies": {
+    "@types/clean-css": "^4.2.11",
+    "@types/jsdom": "^28.0.3",
+    "@vitest/coverage-v8": "^4.1.7",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.7"
+  },
+  "dependencies": {
+    "clean-css": "^5.3.3",
+    "jsdom": "^29.1.1",
+    "vite": "^8"
+  }
+}

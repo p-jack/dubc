@@ -1,4 +1,4 @@
-import { beforeEach, expect, test } from "vitest"
+import { beforeEach, describe, expect, test } from "vitest"
 import { capture } from "dubc-ds-test"
 import { NSet } from "./index"
 
@@ -119,7 +119,7 @@ test("drop", () => {
   expect(set.drop(x => x === "2" || x === "3")).toStrictEqual(2)
   expect(c.all()).toStrictEqual([
     {deleted:{items:["2"], at:1}},
-    {deleted:{items:["3"], at:2}},
+    {deleted:{items:["3"], at:1}},
   ])
   expect(set.size).toStrictEqual(1)
   expect([...set]).toStrictEqual(["1"])
@@ -164,16 +164,29 @@ test("hasAll", () => {
   expect(set.hasAll(["1", "2", "3", "Z"])).toStrictEqual(false)
 })
 
-test("replace", () => {
-  set.replace(["1", "2", "3"])
-  expect(c.only()).toStrictEqual({added:{items:["1", "2", "3"], at:0}})
-  expect(set.size).toStrictEqual(3)
-  expect([...set]).toStrictEqual(["1", "2", "3"])
-
-  set.replace(["A", "B"])
-  expect(c.only()).toStrictEqual({cleared:3, added:{items:["A", "B"], at:0}})
-  expect(set.size).toStrictEqual(2)
-  expect([...set]).toStrictEqual(["A", "B"])
+describe("replace", () => {
+  test("empty with empty", () => {
+    expect(set.replace([])).toStrictEqual(false)
+    expect(c.all().length).toStrictEqual(0)
+    expect(set.size).toStrictEqual(0)
+    expect([...set]).toStrictEqual([])
+  })
+  test("empty with non-empty", () => {
+    expect(set.replace(["1", "2", "3"])).toStrictEqual(true)
+    expect(c.only()).toStrictEqual({added:{items:["1", "2", "3"], at:0}})
+    expect([...set]).toStrictEqual(["1", "2", "3"])
+    expect(set.size).toStrictEqual(3)
+  })
+  test("non-empty with empty", () => {
+    addDummyData()
+    expect(set.replace([])).toStrictEqual(true)
+    expect(c.only()).toStrictEqual({cleared:3})
+  })
+  test("non-empty with non-empty", () => {
+    addDummyData()
+    expect(set.replace(["A", "B", "C"])).toStrictEqual(true)
+    expect(c.only()).toStrictEqual({cleared:3, added:{items:["A", "B", "C"], at:0}})
+  })
 })
 
 test("toEmpty", () => {

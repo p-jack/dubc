@@ -1,7 +1,7 @@
 {
   "name": "dubc-ds-nset",
   "type": "module",
-  "version": "1.0.1",
+  "version": "1.0.5",
   "description": "Observable set based on native sets.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -26,13 +26,13 @@
   },
   "homepage": "https://github.com/p-jack/dubc#readme",
   "dependencies": {
-    "@vitest/coverage-v8": "^4.1.8",
-    "dubc-ds-base": "^1.0.3",
-    "vitest": "^4.1.8"
+    "dubc-ds-base": "^1.0.5"
   },
   "devDependencies": {
-    "dubc-ds-test": "^1.0.1",
+    "@vitest/coverage-v8": "^4.1.8",
+    "dubc-ds-test": "^1.0.5",
     "jsdom": "^27.0.1",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.8"
   }
 }

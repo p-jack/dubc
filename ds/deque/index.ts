@@ -1,4 +1,4 @@
-import { Base } from "dubc-ds-base"
+import { Base, DSEvent } from "dubc-ds-base"
 
 
 interface Node<T> {
@@ -115,18 +115,54 @@ export class Deque<T> extends Base<T> {
 
   clear() {
     const sz = this.#s
+    if (sz === 0) return false
     this.#f = undefined
     this.#l = undefined
     this.#s = 0
     this.fire({cleared:sz})
+    return true
   }
 
   replace(i:Iterable<T>) {
+    const sz = this.#s
     this.#f = undefined
     this.#l = undefined
     this.#s = 0
-    for (const x of i) this.#rawPush(x)
-    this.fire({added:{items:this, at:0}})
+    let added = false
+    for (const x of i) {
+      added = true
+      this.#rawPush(x)
+    }
+    if (!added && sz === 0) return false
+    const evt:DSEvent<T> = {}
+    if (sz > 0) evt.cleared = sz
+    if (added) evt.added = {items:this, at:0}
+    this.fire(evt)
+    return true
+  }
+
+  drop(f:(x:T)=>boolean) {
+    let p:Node<T>|undefined
+    let i = 0
+    let c = 0
+    for (let n = this.#f; n !== undefined; n = n.n) {
+      if (f(n.v)) {
+        c++
+        this.#s--
+        if (p === undefined) {
+          this.#f = n.n
+        } else {
+          p.n = n.n
+        }
+        if (n.n) n.n.p = p
+        if (n === this.#l) this.#l = p
+        this.fire({deleted:{items:[n.v], at:i}})
+        i--
+      }
+      p = n
+      i++
+    }
+    return c > 0
   }
 
 }

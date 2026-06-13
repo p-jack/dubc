@@ -20,12 +20,36 @@ beforeEach(() => {
   expect(emptyC.only()).toStrictEqual({cleared:0})
 })
 
-test("clear", () => {
-  deque.clear()
-  expect(c.only()).toStrictEqual({cleared:3})
-  expect(deque.size).toStrictEqual(0)
-  expect([...deque]).toStrictEqual([])
-  expect([...deque.reversed()]).toStrictEqual([])
+describe("clear", () => {
+  test("empty", () => {
+    expect(empty.clear()).toStrictEqual(false)
+    expect(emptyC.all().length).toStrictEqual(0)
+    expect(empty.size).toBe(0)
+    expect([...empty]).toStrictEqual([])
+    expect([...empty.reversed()]).toStrictEqual([])
+  })
+  test("non-empty", () => {
+    expect(deque.clear()).toStrictEqual(true)
+    expect(c.only()).toStrictEqual({cleared:3})
+    expect(deque.size).toStrictEqual(0)
+    expect([...deque]).toStrictEqual([])
+    expect([...deque.reversed()]).toStrictEqual([])  
+  })
+})
+
+test("drop", () => {
+  deque.push("4")
+  deque.push("5")
+  c.clear()
+  expect(deque.drop(x => x === "1" || x === "3" || x === "5")).toStrictEqual(true)
+  expect(c.all()).toStrictEqual([
+    {deleted:{items:["1"], at:0}},
+    {deleted:{items:["3"], at:1}},
+    {deleted:{items:["5"], at:2}},
+  ])
+  expect(deque.size).toStrictEqual(2)
+  expect([...deque]).toStrictEqual(["2", "4"])
+  expect([...deque.reversed()]).toStrictEqual(["4", "2"])
 })
 
 test("first", () => {
@@ -85,12 +109,35 @@ test("push", () => {
   expect([...deque.reversed()]).toStrictEqual(["4", "3", "2", "1"])
 })
 
-test("replace", () => {
-  deque.replace(["A", "B", "C", "D"])
-  expect(c.only()).toStrictEqual({added:{items:["A", "B", "C", "D"], at:0}})
-  expect(deque.size).toStrictEqual(4)
-  expect([...deque]).toStrictEqual(["A", "B", "C", "D"])
-  expect([...deque.reversed()]).toStrictEqual(["D", "C", "B", "A"])
+describe("replace", () => {
+  test("empty with empty", () => {
+    expect(empty.replace([])).toStrictEqual(false)
+    expect(emptyC.all().length).toStrictEqual(0)
+    expect(empty.size).toStrictEqual(0)
+    expect([...empty]).toStrictEqual([])
+    expect([...empty.reversed()]).toStrictEqual([])
+  })
+  test("empty with non-empty", () => {
+    expect(empty.replace(["11", "22"])).toStrictEqual(true)
+    expect(emptyC.only()).toStrictEqual({added:{items:["11", "22"], at:0}})
+    expect([...empty]).toStrictEqual(["11", "22"])
+    expect([...empty.reversed()]).toStrictEqual(["22", "11"])
+    expect(empty.size).toStrictEqual(2)
+  })
+  test("non-empty with empty", () => {
+    expect(deque.replace([])).toStrictEqual(true)
+    expect(c.only()).toStrictEqual({cleared:3})
+    expect(deque.size).toStrictEqual(0)
+    expect([...deque]).toStrictEqual([])
+    expect([...deque.reversed()]).toStrictEqual([])
+  })
+  test("non-empty with non-empty", () => {
+    expect(deque.replace(["A", "B", "C", "D"])).toStrictEqual(true)
+    expect(c.only()).toStrictEqual({cleared:3, added:{items:["A", "B", "C", "D"], at:0}})
+    expect(deque.size).toStrictEqual(4)
+    expect([...deque]).toStrictEqual(["A", "B", "C", "D"])
+    expect([...deque.reversed()]).toStrictEqual(["D", "C", "B", "A"])
+  })
 })
 
 test("shift", () => {

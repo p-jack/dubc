@@ -1,7 +1,7 @@
 {
   "name": "dubc-ds-tmap",
   "type": "module",
-  "version": "1.0.2",
+  "version": "1.0.5",
   "description": "Observable map based on a weighted binary search tree.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -26,15 +26,15 @@
   },
   "homepage": "https://github.com/p-jack/dubc#readme",
   "dependencies": {
-    "@vitest/coverage-v8": "^4.1.8",
-    "dubc-ds-base": "^1.0.3",
+    "dubc-ds-base": "^1.0.5",
     "dubc-ds-iterables": "^1.0.0",
-    "dubc-ds-pairs": "^1.0.2",
-    "vitest": "^4.1.8"
+    "dubc-ds-pairs": "^1.0.5"
   },
   "devDependencies": {
-    "dubc-ds-test": "^1.0.2",
+    "@vitest/coverage-v8": "^4.1.8",
+    "dubc-ds-test": "^1.0.5",
     "jsdom": "^27.0.1",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.8"
   }
 }

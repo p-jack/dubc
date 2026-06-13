@@ -1,4 +1,5 @@
 import { Base } from "dubc-ds-base"
+import { iterable } from "dubc-ds-iterables"
 import { Pair, Pairs, forEach } from "dubc-ds-pairs"
 
 export interface Include {
@@ -143,7 +144,13 @@ export class TMap<K extends {},V> extends Base<Pair<K,V>> {
     if (sz > 0) {
       if (this.root === undefined) this.fire({cleared:sz})
       else this.fire({cleared:sz, added:{items:this, at:0 }})
-    } else if (this.root !== undefined) this.fire({added:{items:this, at:0 }})
+      return true
+    } else if (this.root !== undefined) {
+      this.fire({added:{items:this, at:0 }})
+      return true
+    } else {
+      return false
+    }
   }
 
   drop(f:(pair:Pair<K,V>)=>boolean) {
@@ -226,15 +233,23 @@ export class TMap<K extends {},V> extends Base<Pair<K,V>> {
     }
   }
 
-  *keys() {
+  *#keys() {
     for (const x of this) yield x.key
   }
 
-  *values() {
+  keys() {
+    return iterable(() => this.#keys())
+  }
+
+  *#values() {
     for (const x of this) yield x.value
   }
 
-  *reversed() {
+  values() {
+    return iterable(() => this.#values())
+  }
+
+  *#reversed() {
     let n = this.last as N<K,V>
     while (n) {
       yield n as Pair<K,V>
@@ -242,13 +257,32 @@ export class TMap<K extends {},V> extends Base<Pair<K,V>> {
     }
   }
 
-  *range(startKey:K, endKey:K, inc:Include = IN_EX) {
+  reversed() {
+    return iterable(() => this.#reversed())
+  }
+
+  *#range(startKey:K, endKey:K, inc:Include) {
     const start = this.find(startKey, inc.start ? GE : GT)
     const cmp = this.compare
     if (inc.end) for (let n = start; n !== undefined && cmp(n.key, endKey) <= 0; n = n.next()) {
       yield n as Pair<K,V>
     } else for (let n = start; n !== undefined && cmp(n.key, endKey) < 0; n = n.next()) {
       yield n as Pair<K,V>
+    }
+  }
+
+  range(startKey:K, endKey:K, inc:Include = IN_EX):Iterable<Pair<K,V>> {
+    return iterable(() => this.#range(startKey, endKey, inc))
+  }
+
+  slice(start:number, end:number):Iterable<Pair<K,V>> {
+    if (end <= start) throw new TypeError("end <= start")
+    const s = this.at(start)
+    if (end === this.size) {
+      return this.range(s.key, this.last!.key, IN_IN)
+    } else {
+      const e = this.at(end)
+      return this.range(s.key, e.key, IN_EX)
     }
   }
 

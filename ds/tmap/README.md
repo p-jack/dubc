@@ -149,7 +149,7 @@ Returns an iterable iterator over the keys in the map.
 
 ### `.range(start:K, end:K, include?:Include)` O(1)
 
-Returns an iterable iterator over a range of keys in the map. The 
+Returns an iterable over a range of keys in the map. The 
 iterator will produce key/value pairs.
 
 The optional third parameter specifies whether the range is inclusive
@@ -197,6 +197,10 @@ The provided pairs can be in one of the three forms accepted by
 `TMap`'s constructor (objects with key and value fields, tuples of
 keys and values, or, for string keys, a JavaScript object.)
 
+### `.slice(start:number, end:number)`
+
+Returns an iterable over a range of indices. `end` is always exclusive.
+
 ### `.to(k:K)` O(log n)
 
 Returns the key/value pair whose key is less than or equal to the provided
@@ -222,8 +226,9 @@ Returns an iterable iterator over the values in the map.
 * `TMap` itself is an iterable, so you can use it directly in `for...of`
 * `i` to get an iterator 
 * `keys()` if you just want the keys
-* `range(start,end,include)` for partial iteration
+* `range(start,end,include)` for partial iteration over a range of keys
 * `reversed()` to iterate backwards
+* `slice(start,end)` for partial iteration over a range of indices
 * `values()` if you just want the values
 
 ### Keys

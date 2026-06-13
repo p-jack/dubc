@@ -3,6 +3,7 @@ import { TMap, IN_IN, IN_EX, EX_IN, EX_EX } from "./index"
 import { capture } from "dubc-ds-test"
 import { Pair } from "dubc-ds-pairs"
 import { DSEvent, Mod } from "dubc-ds-base";
+import { map } from "dubc-ds-iterables";
 
 const K = {};
 
@@ -20,12 +21,6 @@ function sane(e:DSEvent<P>) {
   if (e.deleted !== undefined) e2.deleted = mod(e.deleted)
   if (e.added !== undefined) e2.added = mod(e.added)
   return e2
-}
-
-function *map<T,R>(i:Iterable<T>, f:(x:T)=>R) {
-  for (const x of i) {
-    yield f(x)
-  }
 }
 
 function compare(n1:number, n2:number) {
@@ -72,11 +67,13 @@ function check<K extends {},V extends {}>(node?:Node<K,V>) {
 let tree = TMap.of(compare, {key:1,value:"1"})
 let empty = tree
 let c = capture(K, tree)
+let emptyC = c
 beforeEach(() => {
   tree = new TMap<number,string>([], { compare, valueEq:Object.is, unique:true })
   tree.hear(K, () => { check(root(tree)) })
   c = capture(K, tree)
   empty = tree.toEmpty()
+  emptyC = capture(K, empty)
 })
 
 interface TestCase {
@@ -105,6 +102,7 @@ describe("TMap", () => { for (const tc of cases) {
       tree.clear()
       for (const k of tc.input) tree.set(k, String(k))
       c.clear()
+      emptyC.clear()
     })
     test("after", () => {
       for (let k = 0; k <= 14; k++) expect(tree.after(k)?.key).toStrictEqual(k + 1)
@@ -213,7 +211,9 @@ describe("TMap", () => { for (const tc of cases) {
       expect(tree.hasAll([1, 5, 10, 1000])).toStrictEqual(false)
     })
     test("keys", () => {
-      expect([...tree.keys()]).toStrictEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
+      const i = tree.keys()
+      expect([...i]).toStrictEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
+      expect([...i]).toStrictEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
       expect([...empty.keys()]).toStrictEqual([])
     })
     test("last", () => {
@@ -227,6 +227,7 @@ describe("TMap", () => { for (const tc of cases) {
       test("IN_IN", () => {
         for (let start = 1; start <= 13; start++) {
           const range = map(tree.range(start, start + 2, IN_IN), x => x.key)
+          expect([...range]).toStrictEqual([start, start + 1, start + 2])
           expect([...range]).toStrictEqual([start, start + 1, start + 2])
         }
       })
@@ -253,23 +254,43 @@ describe("TMap", () => { for (const tc of cases) {
       for (let k = 1; k <= 15; k++) expect(tree.rank(k)).toStrictEqual(k - 1)
       expect(tree.rank(16)).toBeUndefined()
     })
-    test("replace", () => {
-      tree.replace([[0, "0"], [10, "10"]])
-      expect(sane(c.only())).toStrictEqual({
-        cleared: 15,
-        added: { items:[{key:0,value:"0"},{key:10,value:"10"}], at:0 }
+    describe("replace", () => {
+      test("empty with empty", () => {
+        expect(empty.replace([])).toStrictEqual(false)
+        expect(emptyC.all()).toStrictEqual([])
+        expect(empty.size).toStrictEqual(0)
+        expect([...empty]).toStrictEqual([])
       })
-      tree.replace([])
-      expect(sane(c.only())).toStrictEqual({cleared:2})
-      tree.replace([])
-      expect(c.all()).toStrictEqual([])
-      tree.replace([[0, "0"], [10, "10"]])
-      expect(sane(c.only())).toStrictEqual({
-        added: { items:[{key:0,value:"0"},{key:10,value:"10"}], at:0 }
+      test("empty with non-empty", () => {
+        expect(empty.replace([[100, "100"], [110, "110"]])).toStrictEqual(true)
+        expect(empty.size).toStrictEqual(2)
+        expect(empty.get(100)).toStrictEqual("100")
+        expect(empty.get(110)).toStrictEqual("110")
+        for (const x of tc.input) expect(empty.get(x)).toBeUndefined()
+      })
+      test("non-empty with empty", () => {
+        expect(tree.replace([])).toStrictEqual(true)
+        expect(sane(c.only())).toStrictEqual({cleared:15})
+        expect(tree.size).toStrictEqual(0)
+        expect([...tree]).toStrictEqual([])
+      })
+      test("non-empty with non-empty", () => {
+        expect(tree.replace([[100, "100"], [110, "110"]])).toStrictEqual(true)
+        expect(sane(c.only())).toStrictEqual({
+          cleared: 15,
+          added: { items:[{key:100,value:"100"},{key:110,value:"110"}], at:0 }
+        })
+        expect(tree.size).toStrictEqual(2)
+        expect(tree.get(100)).toStrictEqual("100")
+        expect(tree.get(110)).toStrictEqual("110")
+        for (const x of tc.input) expect(tree.get(x)).toBeUndefined()
       })
     })
     test("reversed", () => {
-      const reversed = [...tree.reversed()]
+      const i = tree.reversed()
+      const reversed = [...i]
+      const copy = [...i]
+      expect(copy).toStrictEqual(reversed)
       const keys = reversed.map(x => x.key)
       const values = reversed.map(x => x.value)
       expect(keys).toStrictEqual([15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1])
@@ -311,6 +332,15 @@ describe("TMap", () => { for (const tc of cases) {
     test("size", () => {
       expect(tree.size).toStrictEqual(15)
     })
+    test("slice", () => {
+      expect(() => tree.slice(5, 4)).toThrow("end <= start")
+      expect(() => tree.slice(5, 5)).toThrow("end <= start")
+      const i = map(tree.slice(12, 15), x => x.key)
+      expect([...i]).toStrictEqual([13, 14, 15])
+      expect([...i]).toStrictEqual([13, 14, 15])
+      const i2 = map(tree.slice(4, 8), x => x.key)
+      expect([...i2]).toStrictEqual([5, 6, 7, 8])
+    })
     test("to", () => {
       for (let k = 1; k <= 15; k++) expect(tree.to(k)?.key).toStrictEqual(k)
       expect(tree.to(16)?.key).toStrictEqual(15)
@@ -318,7 +348,9 @@ describe("TMap", () => { for (const tc of cases) {
       expect(empty.to(1)).toBeUndefined()  
     })
     test("values", () => {
-      expect([...tree.values()]).toStrictEqual(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"])
+      const i = tree.values()
+      expect([...i]).toStrictEqual(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"])
+      expect([...i]).toStrictEqual(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"])
     })
   })
 }})

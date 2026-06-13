@@ -1,5 +1,6 @@
 import { Base, DSEvent } from "dubc-ds-base"
 import { TMap, IN_EX, IN_IN, EX_IN, EX_EX, Include } from "dubc-ds-tmap"
+import { map } from "dubc-ds-iterables"
 
 export { IN_EX, IN_IN, EX_IN, EX_EX }
 export type { Include }
@@ -28,11 +29,11 @@ export class TIndex<K extends {},V extends {}> extends Base<V> {
       if (evt.cleared !== undefined) e2.cleared = evt.cleared
       if (evt.deleted !== undefined) {
         e2.deleted = {items:map(evt.deleted.items, x => x.value)}
-        if (evt.deleted.at !== undefined) e2.deleted.at = evt.deleted.at
+        e2.deleted.at = evt.deleted.at
       }
       if (evt.added !== undefined) {
         e2.added = {items:map(evt.added.items, x => x.value)}
-        if (evt.added.at !== undefined) e2.added.at = evt.added.at
+        e2.added.at = evt.added.at
       }
       this.fire(e2)
     })
@@ -73,6 +74,10 @@ export class TIndex<K extends {},V extends {}> extends Base<V> {
     return map(this.map.range(s, e, inc), x => x.value)
   }
 
+  slice(start:number, end:number) {
+    return map(this.map.slice(start, end), x => x.value)
+  }
+
   add(value:V) {
     const key = this.conf.index(value)
     return this.map.set(key, value) !== value
@@ -104,8 +109,4 @@ export class TIndex<K extends {},V extends {}> extends Base<V> {
     return this.map.drop(pair => f(pair.value))
   }
 
-}
-
-function *map<T,R>(i:Iterable<T>, f:(x:T)=>R) {
-  for (const x of i) yield f(x)
 }

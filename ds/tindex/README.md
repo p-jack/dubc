@@ -148,7 +148,7 @@ Returns a number that can be sent to `unhear` to stop receiving events.
 
 ### `.range(start:V, end:V, include?:Include)` O(1)
 
-Returns an iterable iterator over a range of values in the index.
+Returns an iterable over a range of values in the index.
 
 The optional third parameter specifies whether the range is inclusive
 or exclusive, and must be one of the following four constants:
@@ -169,8 +169,12 @@ Replaces the content of this index with new values.
 
 ### `.reversed()` O(1)
 
-Returns an iterable iterator over the values in the index, in reverse
+Returns an iterable over the values in the index, in reverse
 sort order.
+
+### `.slice()` O(1)
+
+Returns an iterable over a range of indices.
 
 ### `.to(v:V)` O(log n)
 
@@ -192,8 +196,9 @@ Removes the listener registered with the specified number.
 
 * `TIndex` itself is an iterable, so you can use it directly in `for...of`
 * `i` to get an iterator 
-* `range(start,end,include)` for partial iteration
+* `range(start,end,include)` for partial iteration over values
 * `reversed()` to iterate backwards
+* `slice(start,end)` for partial iteration over indices
 
 ### Keys
 

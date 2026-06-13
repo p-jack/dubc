@@ -1,7 +1,7 @@
 {
   "name": "dubc-ds-tindex",
   "type": "module",
-  "version": "1.0.1",
+  "version": "1.0.5",
   "description": "Observable index based on a weighted binary search tree.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -26,14 +26,13 @@
   },
   "homepage": "https://github.com/p-jack/dubc#readme",
   "dependencies": {
-    "dubc-ds-base": "^1.0.2",
-    "dubc-ds-tmap": "^1.0.1"
+    "dubc-ds-tmap": "^1.0.5"
   },
   "devDependencies": {
-    "@vitest/coverage-v8": "^3.2.4",
-    "dubc-ds-test": "^1.0.1",
+    "@vitest/coverage-v8": "^4.1.8",
+    "dubc-ds-test": "^1.0.5",
     "jsdom": "^27.0.1",
     "typescript": "^5.9.3",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.8"
   }
 }

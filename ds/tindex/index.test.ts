@@ -187,6 +187,10 @@ test("size", () => {
   expect(tree.size).toStrictEqual(3)
 })
 
+test("slice", () => {
+  expect([...tree.slice(0, 2)]).toStrictEqual([user1, user2])
+})
+
 test("to", () => {
   expect(tree.to(user3)).toStrictEqual(user3)
   expect(tree.to(blank)).toBeUndefined()

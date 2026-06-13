@@ -34,7 +34,7 @@ test("Base", () => {
   let c = new C(0)
   expect([...c]).toStrictEqual([])
   let captured:DSEvent<number>|undefined = undefined
-  c.hear(K, evt => {
+  const r = c.hear(K, evt => {
     captured = evt
   })
   expect(captured).toStrictEqual({cleared:0})
@@ -53,6 +53,10 @@ test("Base", () => {
   }
   expect([...a]).toStrictEqual([0, 10])
   expect(JSON.stringify(c)).toStrictEqual("[0,10]")
+  c.unhear(r)
+  captured = undefined
+  c.grow()
+  expect(captured).toBeUndefined()
 })
 
 test("non-empty initial fire", () => {

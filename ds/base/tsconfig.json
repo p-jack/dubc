@@ -7,7 +7,7 @@
     "declaration": true,
     "esModuleInterop":true,
     "isolatedModules": true,
-    "lib": ["es2022"],
+    "lib": ["es2022", "es2023.Collection"],
     "module": "Node16",
     "moduleDetection": "force",
     "moduleResolution": "Node16",
@@ -23,6 +23,6 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
-    "target": "es6",
+    "target": "es2022",
   },
 }

@@ -1,7 +1,7 @@
 {
   "name": "dubc-ds-deque",
   "type": "module",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Observable deque (linked list).",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

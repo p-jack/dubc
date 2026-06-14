@@ -1,6 +1,14 @@
-# dubc-ds-deque
+# dubc-ds-ar
 
-An observable deque (doubly-linked list.)
+An observable array, backed by a native JavaScript array.
+
+Note that this class follows the conventions of other `dubc-ds`
+observable data structures, so the semantics are subtly different
+than what you're used to with native JavaScript arrays. In general,
+this version is much stricter:
+
+1. Bounds are _always_ checked, and invalid indices _always_ throw
+an error.
 
 ## Constructor
 
@@ -19,7 +27,7 @@ const d = Deque.of("1", "2", "3")
 
 ## Properties
 
-### `.first` O(log n)
+### `.first` O(1)
 
 Returns the first value in the deque, or `undefined` if the deque
 is empty.
@@ -28,7 +36,7 @@ is empty.
 
 Returns an iterator over the values in the deque.
 
-### `.last` O(log n)
+### `.last` O(1)
 
 Returns the last value in the deque, or `undefined` if the deque
 is empty.
@@ -48,14 +56,26 @@ Returns the number of values in the deque.
 
 Removes all values from the deque.
 
-### `.hear(f:(event:DSEvent<T>))` O(1)
+### `.drop(f:(x:T)=>boolean)` O(n)
+
+Removes every element from the deque that matches the given predicate,
+and returns the number of items that were dropped.
+
+### `.hear(keeper:object, f:(event:DSEvent<T>))` O(1)
 
 Adds a listener to the deque. Any time the deque changes (and _only_ when
 the deque actually changes), the listener function will be called.
 
+The listener function is also called immediately with the current
+contents of the deque.
+
+The `keeper` parameter keeps a strong reference to the function.
+You will generally want to pass the web component that's listening
+for changes to the deque.
+
 Returns a number that can be sent to `unhear` to stop receiving events.
 
-### `.pop()`
+### `.pop()` O(1)
 
 Removes the last value from the deque and returns it.
 Returns `undefined` if the deque is empty.
@@ -108,12 +128,13 @@ Adds a value to the beginning of the deque.
 
 ### Changing
 
-* `pop` remove the last value
-* `push` add a value to the end
-* `shift` remove the first value
-* `unshift` add a value to the beginning
+* `pop()` remove the last value
+* `push()` add a value to the end
+* `shift()` remove the first value
+* `unshift()` add a value to the beginning
 
 ### Bulk
 
-* `clear` remove all values
+* `clear()` remove all values
 * `replace(values)` clear the deque then add many values
+* `drop(predicate)` removes all values that match the predicate

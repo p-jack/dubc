@@ -41,7 +41,7 @@ test("drop", () => {
   deque.push("4")
   deque.push("5")
   c.clear()
-  expect(deque.drop(x => x === "1" || x === "3" || x === "5")).toStrictEqual(true)
+  expect(deque.drop(x => x === "1" || x === "3" || x === "5")).toStrictEqual(3)
   expect(c.all()).toStrictEqual([
     {deleted:{items:["1"], at:0}},
     {deleted:{items:["3"], at:1}},
@@ -107,6 +107,12 @@ test("push", () => {
   expect(deque.size).toStrictEqual(4)
   expect([...deque]).toStrictEqual(["1", "2", "3", "4"])
   expect([...deque.reversed()]).toStrictEqual(["4", "3", "2", "1"])
+})
+
+test("reversed", () => {
+  const i = deque.reversed()
+  expect([...i]).toStrictEqual(["3", "2", "1"])
+  expect([...i]).toStrictEqual(["3", "2", "1"])
 })
 
 describe("replace", () => {

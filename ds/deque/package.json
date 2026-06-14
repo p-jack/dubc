@@ -1,7 +1,7 @@
 {
   "name": "dubc-ds-deque",
   "type": "module",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Observable deque (linked list).",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -26,7 +26,8 @@
   },
   "homepage": "https://github.com/p-jack/dubc#readme",
   "dependencies": {
-    "dubc-ds-base": "^1.0.5"
+    "dubc-ds-base": "^1.0.5",
+    "dubc-ds-iterables": "^1.0.0"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^4.1.8",

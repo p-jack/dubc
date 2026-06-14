@@ -1,4 +1,5 @@
 import { Base, DSEvent } from "dubc-ds-base"
+import { iterable } from "dubc-ds-iterables"
 
 
 interface Node<T> {
@@ -48,8 +49,12 @@ export class Deque<T> extends Base<T> {
     for (let n = this.#f; n !== undefined; n = n.n) yield n.v
   }
 
-  *reversed() {
+  *#reversed() {
     for (let n = this.#l; n !== undefined; n = n.p) yield n.v
+  }
+
+  reversed() {
+    return iterable(() => this.#reversed())
   }
 
   push(v:T) {
@@ -162,7 +167,7 @@ export class Deque<T> extends Base<T> {
       p = n
       i++
     }
-    return c > 0
+    return c
   }
 
 }

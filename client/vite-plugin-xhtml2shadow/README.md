@@ -14,6 +14,17 @@ npm i -D vite-plugin-xhtml2shadow
 npm i dubc-client-global-css
 ```
 
+Finally, in your project's `/src` folder, you should add the following
+file so that TypeScript understands the types of functions produced
+by this plugin:
+
+**/src/@types/xhtml.d.ts**:
+```TypeScript
+declare module "*.xhtml" {
+  export default function build(el:HTMLElement):boolean
+}
+```
+
 ## Example usage
 
 You can now create web components that reference markup instead of

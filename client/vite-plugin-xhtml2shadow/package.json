@@ -1,7 +1,7 @@
 {
   "name": "vite-plugin-xhtml2shadow",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Converts .xhtml files into JavaScript code that produces a shadow root with that HTML.",
   "keywords": ["vite-plugin"],
   "main": "dist/index.js",

@@ -25,7 +25,7 @@ function compile(src:string) {
   let code = `import {getCSS} from "dubc-client-global-css";`
   code += parser.style.s
   code += parser.code.s
-  code += "}"
+  code += "return false;}"
   return code
 }
 
@@ -46,8 +46,8 @@ class Parser {
       throw new Error(n.textContent!)
     }
     this.code.write(`export default function xhtml(el){`)
-    this.code.write(`if(el.shadowRoot!==null)return;`)
-    this.code.write(`const sh=el.attachShadow({mode:"open",delegatesFocus:true});`) // TODO, more options
+    this.code.write(`if(el.shadowRoot!==null)return true;`)
+    this.code.write(`const sh=el.attachShadow({mode:"open",delegatesFocus:true,clonable:true,serializable:true});`)
     this.code.write(`sh.adoptedStyleSheets.push(getCSS());`)
     this.parsed = parsed
   }
@@ -92,7 +92,7 @@ class Parser {
     for (const x of el.attributes) {
       let { name, value } = x
       if (name === "src" || name === "href") {
-        if (value.startsWith(".") || value.startsWith("/")) {
+        if (value.startsWith(".")) {
           const imp = this.style.next()
           this.style.write(`import ${imp} from ${esc(value)};`)
           value = imp

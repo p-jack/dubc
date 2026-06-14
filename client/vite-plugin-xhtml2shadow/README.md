@@ -49,13 +49,16 @@ class LoginForm extends HTMLElement {
 
   constructor() {
     super()
-    build(this)
+    if (build(this)) return
+    // other set up here
+  }
+
+  connectedCallback() {
     const submit = this.shadowRoot!.querySelector("button")!
     submit.onclick = () => {
       // perform login here
     }
   }
-
 }
 customElements.define("login-form", LoginForm)
 ```
@@ -100,20 +103,23 @@ you'll need to escape their unicode values instead. In practice this
 issue only comes up with non-breaking spaces. Instead of using `&nbsp;`
 like you would in HTML, use `&#x00A0;` instead.
 
-Note that although you _authoring_ your markup as XHTML, the plugin
-produces JavaScript that creates HTML5 elements.
+Note that although you _author_ your markup as XHTML, the plugin
+_produces_ JavaScript that creates HTML5 elements. The usage of xhtml
+is simply for self-closing tags.
 
 ## Server-Side Rendering
 
 If the passed-in element already has a shadow root, the functions
-produced by this plugin do nothing, just silently return. This is
-done to support web components that were rendered by a server via Declarative Shadow DOM.
+produced by this plugin do nothing, just return `true`. This is
+done to support web components that were rendered by a server via
+Declarative Shadow DOM. In your component's constructor, you can
+check the result of the `build` function to exit early if the
+element already has a shadow root.
 
 ## Viteness
 
 This plugin is vite-specific because it relies on vite's ability to
 import static assets as URLs. This is done for `href` and `src`
-attributes that reference a relative URL or an absolute URL that
-begins with `/`. Doing so allows you to specify an asset in your
-`/src` directory via its path, but the plugin will output the correct
-hashed URL when building with vite.
+attributes that reference a relative URL. Doing so allows you to specify
+an asset in your `/src` directory via its path, but the plugin will
+output the correct hashed URL when building with vite.

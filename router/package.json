@@ -1,0 +1,37 @@
+{
+  "name": "dubc-router",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "Simple page router.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "README.md",
+    "dist/index.js",
+    "dist/index.d.ts"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepare": "tsc",
+    "test": "vitest --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/p-jack/dubc.git"
+  },
+  "author": "Paul Jack",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/p-jack/dubc/issues"
+  },
+  "homepage": "https://github.com/p-jack/dubc#readme",
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.1.7",
+    "happy-dom": "^20.10.4",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.7"
+  },
+  "dependencies": {
+    "dubc-client-load": "^0.0.1"
+  }
+}

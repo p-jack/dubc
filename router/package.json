@@ -1,7 +1,7 @@
 {
   "name": "dubc-router",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Simple page router.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -32,6 +32,7 @@
     "vitest": "^4.1.7"
   },
   "dependencies": {
-    "dubc-client-load": "^0.0.1"
+    "dubc-client-load": "^0.0.1",
+    "dubc-signal": "^0.0.1"
   }
 }

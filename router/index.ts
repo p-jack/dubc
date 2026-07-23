@@ -1,4 +1,5 @@
 import { Load, type Loadable } from "dubc-client-load"
+import { Emit, Signal, signaled } from "dubc-signal"
 
 export interface IPage extends Loadable {
   reload():Promise<void>
@@ -46,17 +47,26 @@ export interface Options {
   rules: Rule[]
   show: (page:IPage)=>void
   p404: ()=>Promise<Provider>
-  massage?: (route:Route)=>Route|Promise<new()=>IPage>
+  massage?: (route:Route)=>Promise<Route|(new()=>IPage)>
+}
+
+export interface PathAndQS {
+  path: string
+  qs: Record<string,string>
 }
 
 interface Active {
   rules: Rule[]
   show: (page:IPage)=>void
-  massage: (route:Route)=>Route|Promise<new()=>IPage>
+  massage: (route:Route)=>Promise<Route|(new()=>IPage)>
   p404: ()=>Promise<Provider>
+  signal: Signal<PathAndQS>
+  emit: Emit<PathAndQS>
   current?:{
     page:IPage
     pathAndQS:string
+    path:string
+    qs:Record<string,string>
   }
 }
 
@@ -72,8 +82,9 @@ export async function router(options:Options) {
   if (active !== undefined) throw new Error("router already active")
   window.addEventListener("popstate", handler)
   const { rules, show, p404 } = options
-  const massage = options.massage ?? (r => r)
-  active = { rules, show, massage, p404 }
+  const massage = options.massage ?? (r => Promise.resolve(r))
+  const { signal, emit } = signaled<PathAndQS>({path:"", qs:{}})
+  active = { rules, show, massage, p404, signal, emit }
   await goTo(location.pathname, location.search, false)
 }
 
@@ -83,12 +94,11 @@ export function stop() {
 }
 
 async function pageFor(route:Route) {
-  const massaged = active!.massage(route)
-  if (massaged instanceof Promise) {
-    return await massaged
-  } else {
-    route = massaged
+  const massaged = await active!.massage(route)
+  if (typeof massaged === "function") {
+    return massaged
   }
+  route = massaged
   for (const x of active!.rules) {
     if (x.appliesTo(route.path, route.qs)) {
       return (await x.provider()).pageClass
@@ -105,9 +115,11 @@ async function goTo(path:string, qs:string, push:boolean) {
   for (const [k,v] of search) {
     qsObj[k] = v
   }
+  if (pathAndQS !== a.current?.pathAndQS) {
+    a.emit.value = { path, qs:qsObj }
+  }
   const cls = await pageFor({path, qs:qsObj})
   if (cls === a.current?.page.constructor) {
-    console.log("GNORD RELOAD!!!", push)
     if (push) history.pushState(null, "", pathAndQS)
     a.current.page.reload()
     a.current.pathAndQS = pathAndQS
@@ -115,7 +127,7 @@ async function goTo(path:string, qs:string, push:boolean) {
   }
   if (push) history.pushState(null, "", pathAndQS)
   const page = new cls()
-  a.current = { page, pathAndQS }
+  a.current = { page, pathAndQS, path, qs:qsObj }
   a.show(page)
 }
 
@@ -132,4 +144,8 @@ export async function routeTo(path:string, qs?:Record<string,string>) {
   if (active === undefined) throw new Error("no active router")
   const q = query(qs)
   await goTo(path, q, true)
+}
+
+export function routeSignal():Signal<PathAndQS> {
+  return active!.signal
 }
